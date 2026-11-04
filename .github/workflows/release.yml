@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 26
           package-manager-cache: false
       - name: Require a version tag matching package.json
         run: |
@@ -39,9 +39,9 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 26
           package-manager-cache: false
-      - run: npm pack && mv pin-exact-action-*.tgz release.tgz
+      - run: npm pack && mv serenematt-pin-exact-action-*.tgz release.tgz
       - name: Stage tested artifact
         # Uploads to npm's stage queue. It goes live only after a maintainer approves it
         # with 2FA on npmjs.com or with `npm stage approve <stage-id>`.

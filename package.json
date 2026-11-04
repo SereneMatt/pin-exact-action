@@ -1,5 +1,5 @@
 {
-  "name": "pin-exact-action",
+  "name": "@serenematt/pin-exact-action",
   "version": "0.1.0",
   "description": "Fail CI when package.json versions are not pinned or Node versions drift",
   "type": "module",

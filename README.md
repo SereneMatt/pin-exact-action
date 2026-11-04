@@ -63,25 +63,7 @@ Locally, each problem is an `error: <file>: <message>` line. In GitHub Actions (
 ## CLI
 
 ```sh
-npx pin-exact-action --cwd cloudflare
+npx @serenematt/pin-exact-action --cwd cloudflare
 ```
 
 `--cwd` defaults to `.`. Requires Node 20 or newer. No dependencies.
-
-## Release
-
-1. Bump `version` in `package.json` and commit.
-2. Tag it and push: `git tag vX.Y.Z && git push origin main vX.Y.Z`.
-3. Run the **Release** workflow on that tag: `gh workflow run release.yml --ref vX.Y.Z`. It checks the tag matches the version, runs CI, packs once and stages the tarball on npm. Then it creates the GitHub Release and moves the major tag (`v0`, `v1`, ...) to the release commit.
-4. Approve the staged version on npmjs.com (Staged Packages tab) or with `npm stage approve <stage-id>`.
-
-### Before the first release
-
-The workflow uses npm trusted publishing (OIDC) and staged publishing. There is no `NPM_TOKEN`. npm can only add a trusted publisher to a package that already exists, so publish the first version by hand:
-
-1. From your machine, logged in with 2FA: `npm publish --access public` (or `npm stage publish --access public` and approve it).
-2. On npmjs.com, open the package's Settings → Trusted publishing and add GitHub Actions: user `SereneMatt`, repository `pin-exact-action`, workflow `release.yml`, environment `npm`. Allow only `npm stage publish`.
-3. Run the Release workflow within 2 days. An unused trusted publisher configuration expires after that.
-4. Optional: in Settings → Publishing access, choose "Require two-factor authentication and disallow tokens".
-
-The first release published by hand has no GitHub Release or `v0` tag. Create them yourself, or let the next Release run do it.
