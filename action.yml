@@ -1,0 +1,14 @@
+name: Pin Exact
+description: Fail when package.json dependencies are not exact pins or the Node versions drift from your version file
+author: SereneMatt
+branding:
+  icon: lock
+  color: green
+inputs:
+  working-directory:
+    description: Directory containing package.json and the Node version file
+    required: false
+    default: .
+runs:
+  using: node24
+  main: action/index.js

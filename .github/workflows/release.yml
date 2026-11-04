@@ -1,0 +1,70 @@
+name: Release
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: npm-release
+  cancel-in-progress: false
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Require a version tag matching package.json
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+          const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
+          assert.match(version, /^\d+\.\d+\.\d+$/, 'Release workflow publishes stable versions only');
+          assert.equal(process.env.GITHUB_REF, `refs/tags/v${version}`, 'Run this workflow on the matching vX.Y.Z tag');
+          JS
+  test:
+    needs: version
+    uses: ./.github/workflows/ci.yml
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm pack && mv pin-exact-action-*.tgz release.tgz
+      - name: Stage tested artifact
+        # Uploads to npm's stage queue. It goes live only after a maintainer approves it
+        # with 2FA on npmjs.com or with `npm stage approve <stage-id>`.
+        # npm stage needs npm 11.15.0 or newer.
+        run: npx --yes npm@11.21.1 stage publish ./release.tgz --access public
+  github-release:
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        # Skips creation on a rerun if the release already exists.
+        run: gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --verify-tag --generate-notes --title "$TAG"
+      - name: Move the major tag (v0 for 0.x, v1 for 1.x)
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          major="${TAG%%.*}"
+          git tag -f "$major" "$GITHUB_SHA"
+          git push --force origin "refs/tags/$major"

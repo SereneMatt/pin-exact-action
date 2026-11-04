@@ -1,0 +1,38 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm test
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./
+        with:
+          working-directory: test/fixtures/pass
+  action-fails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - id: check
+        uses: ./
+        continue-on-error: true
+        with:
+          working-directory: test/fixtures/fail
+      - name: Expect the action to fail
+        env:
+          OUTCOME: ${{ steps.check.outcome }}
+        run: test "$OUTCOME" = failure

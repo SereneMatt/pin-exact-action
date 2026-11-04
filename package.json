@@ -1,0 +1,43 @@
+{
+  "name": "pin-exact-action",
+  "version": "0.1.0",
+  "description": "Fail CI when package.json versions are not pinned or Node versions drift",
+  "type": "module",
+  "bin": {
+    "pin-exact-action": "bin/pin-exact-action.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "action",
+    "action.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "ci",
+    "github-action",
+    "dependencies",
+    "pin",
+    "exact-versions",
+    "tool-versions",
+    "node",
+    "engines"
+  ],
+  "author": "SereneMatt",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SereneMatt/pin-exact-action.git"
+  },
+  "homepage": "https://github.com/SereneMatt/pin-exact-action#readme",
+  "bugs": {
+    "url": "https://github.com/SereneMatt/pin-exact-action/issues"
+  }
+}
