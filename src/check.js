@@ -116,6 +116,10 @@ export function check(dir) {
   for (const field of ['dependencies', 'devDependencies']) {
     const types = pkg[field]?.['@types/node'];
     if (types === undefined) continue;
+    if (typeof types === 'string' && LOCAL.test(types)) {
+      error('package.json', `${field}.@types/node@${types} cannot be checked against Node ${from}: local and catalog references are not resolved; use an exact version or an npm: alias to an exact version`);
+      continue;
+    }
     const typesMajor = String(types).slice(String(types).lastIndexOf('@') + 1).match(/\d+/)?.[0];
     if (typesMajor !== major) {
       error('package.json', `${field}.@types/node@${types} must have the same major as Node ${from}`);

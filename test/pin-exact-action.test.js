@@ -90,6 +90,25 @@ test('checks @types/node in dependencies too', () => {
   assert.match(result.stdout, /dependencies\.@types\/node@22\.18\.0 must have the same major/);
 });
 
+test('reports unresolved @types/node references without guessing their major', () => {
+  for (const field of ['dependencies', 'devDependencies']) {
+    for (const spec of ['catalog:', 'catalog:node24', 'workspace:*', 'file:../node24', 'link:../node24']) {
+      const result = fails(fixture({ ...basePkg, [field]: { '@types/node': spec } }));
+      assert.deepEqual(result.lines, [
+        `error: package.json: ${field}.@types/node@${spec} cannot be checked against Node (node 24.11.1 from .tool-versions): local and catalog references are not resolved; use an exact version or an npm: alias to an exact version`,
+      ]);
+    }
+  }
+});
+
+test('accepts @types/node as an exact npm: alias with a matching major', () => {
+  passes(fixture({ ...basePkg, devDependencies: { '@types/node': 'npm:@types/node@24.10.0' } }));
+});
+
+test('accepts a catalog @types/node reference when Node checks are skipped', () => {
+  passes(fixture({ ...basePkg, devDependencies: { '@types/node': 'catalog:' } }, {}));
+});
+
 test('a loose dependency is not hidden by an exact devDependency', () => {
   const result = fails(fixture({ ...basePkg, dependencies: { hono: '^4.0.0' }, devDependencies: { hono: '4.10.4' } }));
   assert.deepEqual(result.lines, ['error: package.json: dependencies.hono@^4.0.0 is not an exact version']);
